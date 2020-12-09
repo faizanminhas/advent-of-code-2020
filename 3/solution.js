@@ -339,7 +339,6 @@ function traverse(map, [startX, startY], [slopeX, slopeY]) {
     if(map[currY][currX] === '#') {
       numTrees += 1;
     }
-    //console.log(currX, currY, map[currY][currX]);
 
   }
 
