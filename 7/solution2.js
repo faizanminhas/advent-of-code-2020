@@ -593,7 +593,7 @@ dark lime bags contain 3 posh crimson bags, 5 posh purple bags, 1 light black ba
 clear silver bags contain 3 faded olive bags, 3 drab turquoise bags, 4 drab purple bags.
 vibrant cyan bags contain 5 vibrant plum bags.`;
 
-const bagRegex = /(?<=[0-9]+)[a-z| ]+(?=bag)/gi;
+const bagRegex = /[0-9]+ [a-z| ]+(?=bag)/gi;
 
 const graph = Object.fromEntries(input.split('\n')
   .map(i => i.split(' bags contain '))
@@ -604,45 +604,17 @@ const graph = Object.fromEntries(input.split('\n')
                      ?.map(x => x.trim()))
       ]));
 
-function dfs({graph, start, target, visited, verified}) {
-  if(verified.has(start)) {
-    return true;
-  }
+const requiredBags = (x, func) => {
+  const num = parseInt(x.substring(0, x.indexOf(' ')), 10);
+  const colour = x.substr(x.indexOf(' ') + 1);
 
-  if(visited.has(start)) {
-    return false;
-  }
-
-  if (start === target) {
-    return true;
-  } else if (graph[start].has(target)){
-    verified.add(start);
-    return true;
-  } else {
-    visited.add(start);
-    const anyInChildren = [...graph[start]].some(x => dfs({graph, start: x, target, visited, verified}));
-    if(anyInChildren) {
-      verified.add(start);
-    }
-    return anyInChildren;
-  }
+  return num * func(colour);
 }
 
-const verified = new Set();
-const visited = new Set();
-
-let sum = 0;
-
-for(let colour of Object.keys(graph)) {
-  if (colour === 'shiny gold') {
-    continue;
-  }
-  if (verified.has(colour)) {
-    sum++;
-  } else if (dfs({ graph, start: colour, target: 'shiny gold', visited, verified })) {
-    sum++;
-  }
+function dfs({graph, start}) {
+  return [...graph[start]].reduce(
+    (t, i) => t + requiredBags(i, colour => dfs({graph, start: colour})), 1)
 }
 
-console.log("the number of nodes that can reach shiny gold is", sum);
-
+// Subtract 1 to exclude the shiny gold bag to begin with
+console.log("The number of required bags is", dfs({graph, start: 'shiny gold'}) - 1 );
